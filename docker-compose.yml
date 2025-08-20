@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ogonok
+      POSTGRES_USER: ogonok
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  bot:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+volumes:
+  db-data:
