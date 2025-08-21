@@ -110,10 +110,16 @@ async def on_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         member_ids = [r['user_id'] for r in members]
         if user_id not in member_ids:
             return
-        await conn.execute(
-            "INSERT INTO daily_marks(chat_id, mark_date, user_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING",
+        row = await conn.fetchrow(
+            """INSERT INTO daily_marks(chat_id, mark_date, user_id)
+               VALUES($1,$2,$3)
+               ON CONFLICT DO NOTHING
+               RETURNING user_id""",
             chat_id, today, user_id
         )
+        if row is None:
+            return
+
         marks = await conn.fetch(
             "SELECT user_id FROM daily_marks WHERE chat_id=$1 AND mark_date=$2",
             chat_id, today
